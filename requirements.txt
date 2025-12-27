@@ -3,3 +3,5 @@ Django>=4.2,<5.0
 django-allauth>=0.60
 Pillow
 requests
+gunicorn
+whitenoise

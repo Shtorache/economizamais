@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+
+<nav class="topbar">
+  <div class="logo">Economiza+</div>
+</nav>
+
+<main class="container">
+  <h2>📸 Enviar nota fiscal</h2>
+
+  <p>
+    Envie a nota para validar sua compra e participar do sorteio
+    <strong>Honda BIS 0km</strong> e receber cashback.
+  </p>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <input type="file" name="nota" accept="image/*,application/pdf" required>
+
+    <button class="btn primary" type="submit">
+      Enviar nota
+    </button>
+  </form>
+</main>
+
+{% endblock %}

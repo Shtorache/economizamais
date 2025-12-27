@@ -1,0 +1,67 @@
+
+{% extends 'base.html' %}
+{% block content %}
+
+<script>
+const url = new URL(window.location.href);
+if (navigator.geolocation && !url.searchParams.get("lat")) {
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    url.searchParams.set("lat", pos.coords.latitude);
+    url.searchParams.set("lng", pos.coords.longitude);
+    window.location.href = url.toString();
+  });
+}
+</script>
+
+<nav class="topbar">
+  <div class="logo">Economiza+</div>
+  <div class="nav-right">
+    <a href="{% url 'profile' %}" class="profile-link">Perfil</a>
+    <a href="{% url 'account_logout' %}" class="logout">Sair</a>
+  </div>
+</nav>
+
+<main class="container">
+  <section class="hero-small">
+    <h2>Bem-vindo, {{ request.user.first_name|default:request.user.username }}!</h2>
+    <p>Ofertas e preços com base nas suas últimas compras.</p>
+
+    <div class="actions">
+      <a href="{% url 'comecar_comprar' %}" class="btn primary">Começar a comprar</a>
+      <a href="{% url 'minhas_compras' %}" class="btn ghost">Ver minhas compras</a>
+    </div>
+  </section>
+
+  <section class="partners">
+    <h3>Mercados próximos de você</h3>
+    <div class="grid">
+      {% for m in mercados %}
+      <div class="card">
+        <strong>{{ m.nome }}</strong>
+        <p>{{ m.endereco }}</p>
+        <p><small>{{ m.distancia }} km de você</small></p>
+
+        <a href="/mercado/{{ m.id }}/" class="btn primary" style="margin-top:8px">
+          Ver ofertas
+        </a>
+      </div>
+      {% empty %}
+      <p>Não encontramos mercados próximos da sua localização.</p>
+      {% endfor %}
+    </div>
+
+
+    <h3>Produtos OpenFoodFacts (chocolate)</h3>
+    <div class="grid">
+      {% for p in off_products %}
+      <div class="card">
+        <strong>{{ p.product_name|default:p.brands }}</strong>
+        <p>Marca: {{ p.brands|default:"—" }}</p>
+      </div>
+      {% empty %}
+      <p>Não foi possível carregar ofertas do OpenFoodFacts.</p>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+{% endblock %}

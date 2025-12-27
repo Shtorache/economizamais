@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<main class="container">
+  <h2>🧾 Minhas Compras</h2>
+
+  {% for compra in compras %}
+    <section class="purchase-block">
+      <h3>
+        Compra #{{ compra.id }}
+        <small>{{ compra.criado_em|date:"d/m/Y H:i" }}</small>
+      </h3>
+
+      <p>Mercado: {{ compra.mercado.nome }}</p>
+      <p>Total: <strong>R$ {{ compra.total }}</strong></p>
+
+      {% if compra.comprovada %}
+        <span class="badge success">✔ Compra verificada</span>
+      {% else %}
+        <a href="{% url 'enviar_nota_fiscal' compra.id %}" class="btn ghost">
+          📸 Enviar nota fiscal
+        </a>
+      {% endif %}
+
+      <div class="grid">
+        {% for item in compra.itens.all %}
+          <div class="card">
+            <strong>{{ item.item.produto.nome }}</strong>
+            <p>Preço: R$ {{ item.preco_pago }}</p>
+            <p>Qtd: {{ item.quantidade }}</p>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="avaliacao"
+          data-compra="{{ compra.id }}"
+          data-avaliada="{% if compra.avaliacao %}true{% else %}false{% endif %}"
+          data-valor="{% if compra.avaliacao %}{{ compra.avaliacao.estrelas }}{% else %}0{% endif %}">
+
+        {% if compra.avaliacao %}
+          <div class="stars readonly">
+            {% for i in "12345" %}
+              {% if forloop.counter <= compra.avaliacao.estrelas %}
+                <span class="star filled">★</span>
+              {% else %}
+                <span class="star">☆</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <form method="post" action="{% url 'avaliar_mercado' compra.id %}" class="star-form">
+            {% csrf_token %}
+            <input type="hidden" name="estrelas" value="0">
+
+            <div class="stars interactive">
+              {% for i in "12345" %}
+                <span class="star" data-value="{{ forloop.counter }}">☆</span>
+              {% endfor %}
+            </div>
+          </form>
+        {% endif %}
+      </div>
+
+
+    </section>
+  {% empty %}
+    <p>Você ainda não finalizou nenhuma compra.</p>
+  {% endfor %}
+</main>
+
+<script>
+document.querySelectorAll(".stars.interactive").forEach(stars => {
+  const form = stars.closest("form");
+  const input = form.querySelector("input[name='estrelas']");
+  const starEls = stars.querySelectorAll(".star");
+
+  starEls.forEach(star => {
+    const value = parseInt(star.dataset.value);
+
+    star.addEventListener("mouseover", () => {
+      fillStars(value);
+    });
+
+    star.addEventListener("mouseout", () => {
+      fillStars(parseInt(input.value));
+    });
+
+    star.addEventListener("click", () => {
+      input.value = value;
+      fillStars(value);
+      form.submit();
+    });
+  });
+
+  function fillStars(qtd) {
+    starEls.forEach(s => {
+      if (parseInt(s.dataset.value) <= qtd) {
+        s.textContent = "★";
+        s.classList.add("filled");
+      } else {
+        s.textContent = "☆";
+        s.classList.remove("filled");
+      }
+    });
+  }
+});
+</script>
+
+<style>
+/* =========================
+   MINHAS COMPRAS
+========================= */
+
+.purchase-block {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.purchase-block h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.purchase-block h3 small {
+  font-size: 13px;
+  font-weight: 400;
+  color: #64748b;
+  margin-left: 8px;
+}
+
+.purchase-block p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #334155;
+}
+
+.purchase-block .badge.success {
+  margin-top: 10px;
+}
+
+/* GRID DE ITENS */
+.purchase-block .grid {
+  margin-top: 16px;
+}
+
+/* AVALIAÇÃO */
+.avaliacao {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed #e5e7eb;
+}
+
+.stars {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.star {
+  font-size: 26px;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.star.filled {
+  color: #facc15;
+}
+
+.stars.interactive .star:hover {
+  transform: scale(1.25);
+}
+
+.stars.readonly .star {
+  cursor: default;
+}
+
+/* BOTÃO ENVIAR NOTA */
+.purchase-block .btn.ghost {
+  margin-top: 10px;
+}
+</style>
+
+{% endblock %}

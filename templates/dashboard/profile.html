@@ -1,0 +1,22 @@
+
+{% extends 'base.html' %}
+{% block content %}
+<nav class="topbar">
+  <div class="logo">Economiza+</div>
+  <div class="nav-right">
+    <a href="{% url 'dashboard' %}">Dashboard</a>
+    <a href="{% url 'account_logout' %}" class="logout">Sair</a>
+  </div>
+</nav>
+
+<main class="container profile-main">
+  <h2>Meu Perfil</h2>
+  <div class="profile-card">
+    <p><strong>Usuário:</strong> {{ user.username }}</p>
+    <p><strong>Nome:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Tipo:</strong> {{ profile.tipo|default:"Consumidor" }}</p>
+    <p><strong>Cidade:</strong> {{ profile.cidade|default:"—" }}</p>
+  </div>
+</main>
+{% endblock %}

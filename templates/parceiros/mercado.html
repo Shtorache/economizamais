@@ -1,0 +1,194 @@
+<form method="get" class="filters">
+  <input type="text" name="q" placeholder="Buscar item..." value="{{ q }}">
+
+  <select name="filtro">
+    <option value="hoje" {% if filtro == "hoje" %}selected{% endif %}>Hoje</option>
+    <option value="semana" {% if filtro == "semana" %}selected{% endif %}>Semana anterior</option>
+    <option value="mes" {% if filtro == "mes" %}selected{% endif %}>Mês anterior</option>
+  </select>
+
+  <button type="submit">Filtrar</button>
+</form>
+
+<div class="grid">
+{% for d in dados %}
+  <div class="card">
+    <strong>{{ d.item.produto.nome }}</strong>
+    <p>{{ d.item.produto.marca }}</p>
+
+    <p>Hoje: R$ {{ d.hoje }}</p>
+    <p>Semana: R$ {{ d.semana }}</p>
+    <p>Mês: R$ {{ d.mes }}</p>
+
+    <form method="post" action="{% url 'add_carrinho' d.item.id %}">
+      {% csrf_token %}
+      <button class="btn primary" type="submit">
+        Adicionar ao carrinho
+      </button>
+    </form>
+
+    {% if d.ultimo_pago %}
+      <p><strong>Quanto eu paguei:</strong> R$ {{ d.ultimo_pago }}</p>
+    {% else %}
+      <p><em>Você ainda não comprou este item</em></p>
+    {% endif %}
+  </div>
+{% endfor %}
+</div>
+
+{% if total_carrinho > 0 %}
+  <div class="checkout">
+    <p>
+      Total atual:
+      <strong>R$ {{ total_carrinho }}</strong>
+    </p>
+
+    <a href="{% url 'finalizar_compra' %}" class="btn primary">
+      Finalizar compra
+    </a>
+  </div>
+{% endif %}
+
+<style>
+/* =========================
+   MERCADO — LAYOUT
+========================= */
+
+.filters {
+  display: grid;
+  grid-template-columns: 1fr 180px auto;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 16px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+}
+
+.filters input,
+.filters select {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.filters input:focus,
+.filters select:focus {
+  border-color: #16a34a;
+  outline: none;
+}
+
+.filters button {
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filters button:hover {
+  background: #22c55e;
+}
+
+/* =========================
+   GRID PRODUTOS
+========================= */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(2,6,23,0.08);
+}
+
+.card strong {
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.card p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 2px 0;
+}
+
+/* DESTAQUE PREÇO */
+.card p:first-of-type {
+  margin-top: 8px;
+}
+
+.card p:nth-of-type(1) {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* BOTÃO */
+.card form {
+  margin-top: auto;
+}
+
+.card .btn.primary {
+  margin-top: 12px;
+  width: 100%;
+}
+
+/* =========================
+   CHECKOUT
+========================= */
+
+.checkout {
+  position: sticky;
+  bottom: 20px;
+  margin-top: 32px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  box-shadow: 0 30px 60px rgba(2,6,23,0.12);
+}
+
+.checkout p {
+  margin: 0;
+  font-size: 16px;
+}
+
+.checkout strong {
+  font-size: 18px;
+}
+
+/* =========================
+   RESPONSIVO
+========================= */
+
+@media (max-width: 640px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+</style>

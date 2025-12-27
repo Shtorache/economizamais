@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+<nav class="topbar">
+  <div class="logo">Economiza+</div>
+</nav>
+
+<div id="map" style="height: calc(100vh - 56px);"></div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+navigator.geolocation.getCurrentPosition(function(pos) {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+
+    const map = L.map('map').setView([lat, lng], 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    L.marker([lat, lng]).addTo(map)
+      .bindPopup("📍 Você está aqui");
+
+    fetch(`/api/mercados/proximos/?lat=${lat}&lng=${lng}`)
+      .then(r => r.json())
+      .then(data => {
+        data.mercados.forEach(m => {
+            const popup = `
+              <strong>${m.nome}</strong><br>
+              🏪 Supermercado<br>
+              📍 ${m.endereco}<br><br>
+              <a href="/mercado/${m.id}/" class="btn-popup">
+                Ver as ofertas
+              </a>
+            `;
+            L.marker([m.latitude, m.longitude])
+              .addTo(map)
+              .bindPopup(popup);
+        });
+      });
+});
+</script>
+
+<style>
+.btn-popup {
+  display:inline-block;
+  padding:8px 12px;
+  background:#16a34a;
+  color:white;
+  border-radius:8px;
+  text-decoration:none;
+  font-weight:600;
+}
+</style>
+
+{% endblock %}
